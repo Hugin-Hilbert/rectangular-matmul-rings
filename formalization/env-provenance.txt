@@ -1,0 +1,56 @@
+Offline Lean environment provenance (inspected 2026-10-12, Asia/Shanghai)
+
+Toolchain: Lean 4.33.0-rc1, x86_64-unknown-linux-gnu
+Lean commit: 62eed1db4d67327ec8120be05f1a1b0847d74561
+Executable: the actual binary inside the installed Lean 4.33.0-rc1 toolchain.
+Set MATMUL_LEAN to this executable when reusing another installation.
+
+Reused package bundle:
+  An existing Lake packages directory, selected with MATMUL_PACKAGES.
+mathlib commit: 79d0395a1825a6264ad5d269e35e60537518955e
+mathlib tag in existing manifest: v4.33.0-rc1
+Compiled mathlib artifacts: mathlib/.lake/build/lib/lean inside that bundle.
+Other reused compiled packages:
+  LeanSearchClient, importGraph, Qq, proofwidgets, batteries, aesop, plausible
+
+check_lean.py is the single source of the executable and package configuration.
+build_local.py imports these settings, sets LEAN_PATH to the local build output
+followed by existing package .olean directories, scans local import dependencies,
+and calls Lean directly in dependency order. --jobs supports 1 to 4 workers.
+No Lake command, package installation, toolchain installation, or download occurs.
+The original bundle is only read. Generated files are confined to formalization:
+  .lake/build/lib/lean   compiled local .olean files and incremental signatures
+  .lake/build/logs       compiler commands, exit codes, stdout and stderr
+  .lake/build/tmp        temporary outputs, cleaned after each compilation
+
+Initial smoke check:
+  import Mathlib.Data.Matrix.Mul
+  import Mathlib.Tactic.NoncommRing
+  A noncommutative Ring distributivity example passed using noncomm_ring.
+  Matrix.mul_apply and Finset.sum_bij were available.
+  Exit status 0, approximately 3.38 seconds, without modifying the shared bundle.
+
+Examples (from the project root):
+  python3 formalization/build_local.py OAI.LinearAlgebra.MatrixMultiplication.Tensor.ComplexTensorRestrictionComposition --jobs 2
+  python3 formalization/build_local.py --all -DmaxRecDepth=10000
+  python3 formalization/build_local.py Some.Module --maxRecDepth 10000
+  python3 formalization/build_local.py Some.Module --lean-arg=-T100000
+
+Dependency-runner validation (2026-10-12):
+  Target: OAI.LinearAlgebra.MatrixMultiplication.Tensor.ComplexTensorRestrictionComposition
+  Flags: --jobs 2 -DmaxRecDepth=10000
+  ComplexTensor dependency: passed, 4.53 seconds
+  ComplexTensorRestrictionComposition target: passed, 4.80 seconds
+  Repeated invocation with --jobs 4: both modules reused via matching signatures
+  A temporary invalid proof returned exit 1 and saved Lean's error to its log.
+  A temporary missing mathlib import returned exit 1 before compilation and
+  explicitly reported that no packages would be downloaded. Probe files removed.
+
+Portable runner validation (2026-10-13):
+  Explicit executable, package-bundle, and compiled-library overrides passed.
+  A fresh temporary checkout with spaces in its path compiled a local module
+  and reused it on the next build; the direct checker also passed.
+  Invalid paths and elan symlink/hardlink shims were rejected before execution.
+  Full publication recheck: all 94 local modules passed, with only the three
+  standard axioms in the public theorem audits. No dependencies were installed
+  or updated.

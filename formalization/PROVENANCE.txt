@@ -1,0 +1,98 @@
+This formalization was checked using an existing Lean and mathlib installation.
+The build runners reuse compiled dependencies and do not install, update, or
+reinstall Lean or mathlib. Configure a different existing installation with
+MATMUL_LEAN, MATMUL_PACKAGES, or MATMUL_LEAN_PATH; see README.md.
+
+Local compiler:
+  leanprover/lean4:v4.33.0-rc1
+
+Existing mathlib cache:
+  commit 79d0395a1825a6264ad5d269e35e60537518955e
+
+Source provenance:
+
+  openai/math
+  https://github.com/openai/math
+  checked-out commit fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb
+  Original tensor foundation and scalar entropy/counting modules.
+  Apache-2.0; license retained in UPSTREAM-LICENSE.
+
+  jzuiddam/omega-nine-quarters-all-fields
+  https://github.com/jzuiddam/omega-nine-quarters-all-fields
+  commit 615b591cddd8792173c17b58558ef3b9f11a702c
+  Generic convex separation and spectral-state construction, originally
+  derived from openai/math commit adc7f1241b42e322a6451854ab7e4b4c146bf78a.
+  Apache-2.0; the modules retain their upstream notices where present.
+  The upstream NOTICE is retained in
+  ../licenses/omega-nine-quarters-all-fields.NOTICE.
+
+  harfe/fixed-point-theorems-lean4
+  https://github.com/harfe/fixed-point-theorems-lean4
+  commit 770940ddf9878cf61952ed53d910b92bca841838
+  Five source modules needed by the upstream spectral fixed-point argument.
+  MIT; license retained in FixedPointTheorems/MIT_LICENSE.
+
+Compatibility changes to reused source modules:
+
+  Mathlib.Basic.Real.Basic imports use Mathlib.Data.Real.Basic in the local
+  mathlib version; Set.ofPred uses Set.setOf; the newer Nonneg alias is
+  expressed by its equivalent nonnegative subtype. Fixed-point source has
+  explicit noncomputability and Fin-index coercion proofs where needed by
+  this compiler. Pure entropy dependencies use the older ite lemma names.
+  These changes retain the mathematical definitions and proofs.
+  Adapted files carry attribution and modification notices. The original
+  notices from upstream sources are retained. Repository licensing and
+  attribution are summarized in ../LICENSE and ../NOTICE.
+
+New Matmul modules implement integral tensors, unit-admitting classes,
+finite-algebra rank descent, integer coefficient extraction, integer
+separation, local interpolation/Bézout patching, and the rectangular analysis.
+The discrete profile analysis provides a proof of the parabolic constraint
+without a homogenization theorem.
+
+Build tools:
+
+  check_lean.py directly invokes the installed compiler and sets LEAN_PATH
+  to existing dependency .olean directories.
+  build_local.py recursively builds only project-local Lean source modules.
+  Generated files and logs stay in formalization/.lake/build.
+
+Examples:
+
+  python3 formalization/build_local.py Matmul.IntegralConvolution --jobs 2
+  python3 formalization/build_local.py Matmul.DiscreteParameterCap --jobs 2
+  python3 formalization/build_local.py Checks.SpectrumAxioms --jobs 2
+
+The complete public theorem is:
+
+  Matmul.RectangularPrograms.rectangular_multiplication_programs
+
+It constructs a ring-independent family of strict finite arithmetic circuits
+for n-by-ceil(n^k) times ceil(n^k)-by-n matrix multiplication, valid over every
+NonUnitalRing and with the rectangular bound plus any positive exponent slack
+for all n >= 1. Square and half-rectangular corollaries are in the same module.
+The syntax admits only wires, zero, addition, negation, ordered multiplication,
+and finite composition/packaging. Integer coefficients are charged as actual
+addition and negation gates. There is no arbitrary ring-function instruction.
+
+The theorem uses classical existence witnesses, rather than an extracted
+executable algorithm; its cost is the arithmetic gate count, not the Lean
+evaluator runtime or bit complexity. The general three-shape corollary and
+lower-bound discussion in the companion note are outside the public Lean
+formalization scope.
+
+Full main theorem and axiom audit:
+
+  python3 formalization/build_local.py Matmul.RectangularPrograms Checks.RectangularAxioms --jobs 2
+
+Every local source can be rebuilt with:
+
+  python3 formalization/build_local.py --all --jobs 2
+
+Publication preparation (2026-10-13):
+
+  English README files and extension notes replace the Chinese explanations.
+  Build paths are configurable, with automatic discovery of existing caches.
+  The source archive includes the required licenses and attribution notices
+  and excludes build artifacts, upstream checkouts, and local workspace state.
+  No mathematical definitions or proof bodies were changed for publication.

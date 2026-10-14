@@ -1,0 +1,47 @@
+{
+  "lean_toolchain": "leanprover/lean4:v4.33.0-rc1",
+  "recorded_date": "2026-10-12",
+  "purpose": "Revisions of the existing compiled dependency bundle; the build runners do not fetch these packages.",
+  "packages": [
+    {
+      "name": "LeanSearchClient",
+      "url": "https://github.com/leanprover-community/LeanSearchClient",
+      "rev": "c5d5b8fe6e5158def25cd28eb94e4141ad97c843"
+    },
+    {
+      "name": "Qq",
+      "url": "https://github.com/leanprover-community/quote4",
+      "rev": "ee41917ae11d38479fb8fb24745f7ca4bf0a784d"
+    },
+    {
+      "name": "aesop",
+      "url": "https://github.com/leanprover-community/aesop",
+      "rev": "57d3325be72a842920813bcb40f96a6f7393c185"
+    },
+    {
+      "name": "batteries",
+      "url": "https://github.com/leanprover-community/batteries",
+      "rev": "31a49105f960721073a9adfc82b261f5d0f2ce1e"
+    },
+    {
+      "name": "importGraph",
+      "url": "https://github.com/leanprover-community/import-graph",
+      "rev": "18a90119a5d316358fde6c86e0ca24e59212e32c"
+    },
+    {
+      "name": "mathlib",
+      "url": "https://github.com/leanprover-community/mathlib4",
+      "rev": "79d0395a1825a6264ad5d269e35e60537518955e"
+    },
+    {
+      "name": "plausible",
+      "url": "https://github.com/leanprover-community/plausible",
+      "rev": "b1c4a69a7e247ab7df20460212001673d74f08c0"
+    },
+    {
+      "name": "proofwidgets",
+      "url": "https://github.com/leanprover-community/ProofWidgets4",
+      "rev": "b1436dc749e722c9920036b52cdc43b3451d0b69"
+    }
+  ]
+}

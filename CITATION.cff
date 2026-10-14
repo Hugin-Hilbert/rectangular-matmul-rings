@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this formalization or its ring extension, please cite this repository and the upstream mathematical sources identified in README.md and NOTICE."
+type: software
+title: "Shared-leg rectangular matrix multiplication over arbitrary rings"
+authors:
+  - family-names: Zhou
+    given-names: Yang
+  - family-names: Wang
+    given-names: Mingsheng
+date-released: "2026-10-14"
+url: "https://github.com/Hugin-Hilbert/rectangular-matmul-rings"
+repository-code: "https://github.com/Hugin-Hilbert/rectangular-matmul-rings"
+license: Apache-2.0
+abstract: >-
+  Lean 4 formalization of rectangular matrix multiplication over every
+  associative ring, including noncommutative and nonunital rings. The
+  ring-independent arithmetic circuits give square matrix multiplication
+  exponent at most 9/4 (2.25), dual exponent at least 1/2, and the shared-leg
+  rectangular exponent curve, with arbitrary positive exponent slack.
+  Includes the research note, integral tensor constructions, finite identity
+  checks, and a proof correspondence. The rectangular bound originates in
+  Przemyslaw Uznanski's arXiv:2610.10494; source provenance is in NOTICE.
+keywords:
+  - matrix multiplication
+  - rectangular matrix multiplication
+  - matrix multiplication exponent
+  - dual exponent
+  - arbitrary rings
+  - noncommutative rings
+  - nonunital rings
+  - integral tensor rank
+  - shared-leg entropy
+  - arithmetic circuits
+  - Lean 4
+  - formal verification

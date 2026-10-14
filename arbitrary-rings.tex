@@ -1,0 +1,915 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\rk}{\operatorname{rank}_{\Z}}
+\newcommand{\ark}{\widetilde{\operatorname{rank}}_{\Z}}
+\newcommand{\res}{\mathrel{\geq_{\Z}}}
+\newcommand{\degto}{\mathrel{\rightsquigarrow_{\Z}}}
+\DeclareMathOperator{\Norm}{Norm}
+\title{Shared-leg rectangular matrix multiplication\protect\\over arbitrary rings}
+\author{Yang Zhou\textsuperscript{1,2,3}\qquad Mingsheng Wang\textsuperscript{2}\\[0.8ex]
+  {\small\textsuperscript{1}State Key Laboratory of Information Security}\\
+  {\small\textsuperscript{2}Institute of Information Engineering, Chinese Academy of Sciences}\\
+  {\small\textsuperscript{3}School of Cyber Security, University of Chinese Academy of Sciences}\\\\[0.8ex]
+  {\small\href{mailto:zhouyang2000@iie.ac.cn}{\texttt{zhouyang2000@iie.ac.cn}}}\\
+  {\small\href{mailto:wangmingsheng@iie.ac.cn}{\texttt{wangmingsheng@iie.ac.cn}}}}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+We give an integral extension of the rectangular bound in
+\href{https://arxiv.org/abs/2610.10494}{arXiv:2610.10494v1}.
+The new algebraic ingredients are an integer asymptotic-rank bound for
+convolution and an integer replacement for Fourier separation.
+Together with a discrete proof of the real-variable profile implication,
+they produce integer bilinear algorithms valid over every associative
+ring, including noncommutative rings and rings without identity.
+All bounds concern arithmetic operations, with arbitrary positive
+slack in the exponent; no bit-complexity bound is asserted.
+\end{abstract}
+
+\section{Statement and computational model}
+
+For $k\geq0$ set
+\[
+ f(k)=\begin{cases}
+ 2,&0\leq k\leq\tfrac12,\\
+ 1+k+\dfrac1{4k},&k>\tfrac12.
+ \end{cases}
+\]
+\begin{theorem}[Universal ring version]\label{thm:ring}
+For every $k\geq0$ and $\varepsilon>0$ there are a family of integer
+bilinear circuits and a constant $C=C(k,\varepsilon)>0$ such that,
+for every associative ring $R$ and every integer $n\geq1$, the circuit
+for size $n$ multiplies an $n\times\lceil n^k\rceil$ matrix by a
+$\lceil n^k\rceil\times n$ matrix using at most
+$Cn^{f(k)+\varepsilon}$ additions, negations, and multiplications.
+The circuits and $C$ are chosen before $R$. Commutativity, an identity,
+and restrictions on characteristic or zero divisors are unnecessary.
+\end{theorem}
+
+Here an integer bilinear algorithm forms integer linear combinations
+of the first input, integer linear combinations of the second input,
+multiplies each first combination on the left of its second
+combination, and recombines the products with integer coefficients.
+Integer multiples are implemented by additions and negations.
+For $c\in\Z$ and $r\in R$, $cr$ means the integer action on the
+additive group: repeated addition, with negation for negative $c$.
+It requires neither an element $c$ in $R$ nor a multiplicative identity.
+Each addition, negation, or ordered multiplication costs one operation.
+Input reads, zero, copying and reindexing available values, and choosing
+output coordinates cost no arithmetic operations. Finite intermediate
+families are computed once and may be reused. There is no primitive
+integer scalar multiplication: it is compiled into additions and negations.
+The positive exponent slack absorbs logarithmic overhead; the theorem
+does not assert $O(n^{f(k)})$ without slack.
+
+\paragraph{Background used.}
+For background on bilinear algorithms and block recursion, consult
+\cite[Chapters 14--15]{BCS}; for finite fields, \cite[Chapter 2]{LN}.
+We use elementary finite free module and determinant algebra,
+the existence of finite fields of every prime-power order, and standard
+real analysis (including Fekete's lemma and Stirling's estimate).
+Its only specialized external theorem is abstract spectral rank duality,
+stated below with its hypotheses. The integral constructions and discrete
+parameter argument are proved here; spectral duality itself is cited
+rather than reproved. A declaration-level correspondence with the checked
+Lean development is in \path{formalization/proof-correspondence.md}.
+
+\paragraph{Proof route.}
+An integer coefficient identity gives an algorithm over every ring
+because its two multiplication factors retain their order. It therefore
+suffices to obtain one fixed integer base algorithm with the required
+rank-to-size ratio. Integral spectral duality reduces that task to
+bounding character values of matrix tensors. Coefficient extraction and
+convolution supply the shared-leg entropy inequalities; the discrete
+profile argument then bounds the character parameters by a parabola.
+The final step selects the base algorithm and charges all coefficient
+arithmetic in its recursion.
+
+\section{An integral spectrum with the right order}
+
+An integer tensor is a finite three-index array $T_{ijh}$, written
+as the formal expression
+\[
+ T(x,y,z)=\sum_{i,j,h}T_{ijh}x_i y_j z_h.
+\]
+The three variable groups are its \emph{legs}. These variables record
+coefficients; they do not impose commutativity on the ring where the
+algorithm will run. A rank-one tensor is $L(x)M(y)N(z)$, with integer
+linear forms. Thus $T=\sum_{\ell=1}^rL_\ell(x)M_\ell(y)N_\ell(z)$
+describes $r$ ordered products: evaluate $L_\ell$ on the first input
+and $M_\ell$ on the second, multiply in that order, and use the
+coefficients of $N_\ell$ to recombine the outputs. Tensor rank counts
+these products; the final section also charges additions and negations.
+
+A restriction independently substitutes integer linear forms on each
+leg. Direct sum uses disjoint coordinate groups on all three legs,
+with every mixed coefficient zero. Tensor product pairs coordinate
+indices and multiplies the corresponding integer coefficients.
+All coordinate spaces below are finite free $\Z$-modules.
+Write $A\res B$ when $A$ restricts to $B$. For $m\in\N$, let
+$D_m=\sum_{i=1}^m x_i y_i z_i$ and $1=D_1$.
+The integer rank $\rk(T)$ is the least $m$ with $D_m\res T$.
+
+We work in the semiring $\mathcal S$ consisting of $0$ and the integer
+tensors that restrict to $1$, modulo mutual integer restriction.
+Addition is full direct sum and multiplication is tensor product.
+This choice matters: all nonzero integer tensors would be unsuitable,
+since $2xyz$ cannot restrict to $xyz$ over $\Z$.
+
+The semiring is closed under both operations and under leg
+permutations. Every nonzero $T\in\mathcal S$ satisfies
+\[
+ D_{\rk(T)}\res T\res1.
+\]
+Expansion in a basis proves finiteness of rank. The diagonal tensors
+embed $\N$ with its usual order: the reverse implication follows by
+flattening after base change to $\Q$. Restrictions respect both
+operations. Finally, for any $A$ and nonzero $B$, some $m$ satisfies
+$mB\res A$, because $B\res1$ and $D_{\rk(A)}\res A$.
+Thus restriction is a Strassen preorder on $\mathcal S$.
+
+Here the preorder convention for the abstract theorem is
+$B\preceq A$ if $A\res B$. The theorem applies to a commutative
+semiring with a preorder that induces the usual order on $\N$,
+respects addition and multiplication, and has the cofinality property
+$A\preceq mB$ for some $m\in\N$ whenever $B\ne0$.
+It asserts that the normalized monotone semiring homomorphisms form a
+nonempty spectrum and, when $1\preceq T$, their supremum is the
+asymptotic rank of $T$. The preceding paragraph verifies each hypothesis;
+commutativity here concerns tensor classes, independently of the eventual
+coefficient ring of the algorithm.
+
+Let $\Delta(\mathcal S)$ be the set of normalized, additive,
+multiplicative, restriction-monotone maps $\lambda:\mathcal S\to\R_{\geq0}$.
+Set $\ark(0)=0$ and, for nonzero $T\in\mathcal S$, define
+\[
+ \ark(T)=\exp\left(\inf_{m\geq1}
+                    \frac{\log\rk(T^{\otimes m})}{m}\right).
+\]
+Rank is submultiplicative under tensor product, so the logarithms are
+subadditive. Fekete's lemma identifies this infimum with the limit in
+the next display. This infimum definition is the one used in Lean.
+The abstract spectral rank theorem~\cite[Theorem 2.13,
+Corollary 2.14, Theorem 2.16]{Zui}
+therefore gives, for nonzero $T\in\mathcal S$,
+\begin{equation}\label{eq:spectrum}
+ \ark(T)=\lim_{m\to\infty}\rk(T^{\otimes m})^{1/m}
+ =\sup_{\lambda\in\Delta(\mathcal S)}\lambda(T).
+\end{equation}
+The nonzero case has $T\res1$, so every character has value at least
+$1$, as required by that theorem. For $T=0$, both rank and every
+character value are zero, and the same display holds directly.
+We call these maps characters. In particular,
+$1\leq\lambda(T)\leq\rk(T)$ for nonzero objects, and
+$\lambda(T)\leq\ark(T)$ by applying the rank bound to tensor powers.
+Thus a character is a numerical size estimate compatible with independent
+tasks, tensor products, and integer preprocessing. Each character gives
+a rank lower bound; spectral duality says that bounding all of them also
+bounds asymptotic rank.
+
+For a positive integer $q$, the oriented dot products are
+\[
+ B_X(q)=x\sum_{j=1}^q y_jz_j,\quad
+ B_Y(q)=y\sum_{j=1}^q x_jz_j,\quad
+ B_Z(q)=z\sum_{j=1}^q x_jy_j.
+\]
+They belong to $\mathcal S$. For each character, multiplicativity and
+monotonicity give parameters $p_i=\log_2\lambda(B_i(2))$, $i\in\{X,Y,Z\}$,
+with
+\begin{equation}\label{eq:dot}
+ \lambda(B_i(q))=q^{p_i},\qquad 0\leq p_i\leq1.
+\end{equation}
+Comparison of $q^m$ with adjacent powers of $2$ proves the power law.
+For positive integers $a,b,c$, define the matrix multiplication tensor
+\[
+ \langle a,b,c\rangle=\sum_{i=1}^a\sum_{j=1}^b\sum_{h=1}^c
+             x_{ij}y_{jh}z_{hi}.
+\]
+Its factorization into the three oriented dot products gives
+\begin{equation}\label{eq:mm}
+ \lambda(\langle a,b,c\rangle)=a^{p_Y}b^{p_Z}c^{p_X}.
+\end{equation}
+
+\section{Coefficient extraction replaces division}
+
+Write $A\degto S$ when integer Laurent-polynomial leg maps transform
+$A$ to a tensor family $F(t)=t^\ell S+\text{terms of degree greater than }\ell$
+for some $\ell\in\Z$. This also allows $S=0$.
+In the weighted constructions below, a variable of integer weight $w$
+is replaced by $t^w$ times that variable. The lowest total-weight terms
+give the leading coefficient. The parameter $t$ is a formal bookkeeping
+device; coefficient extraction makes the resulting comparison integral.
+
+\begin{lemma}[Integral degeneration monotonicity]\label{lem:deg}
+If $A,S\in\mathcal S$ and $A\degto S$, then
+$\lambda(A)\geq\lambda(S)$ for every character.
+\end{lemma}
+\begin{proof}
+Shift the leg maps so their entries are polynomials and the shifted
+$\ell$ is nonnegative. Write the resulting tensor as
+$F(t)=t^\ell S+\text{higher-degree terms}$, $\ell\geq0$.
+For an integer $d\geq0$, the coefficient tensor on three copies of
+$\Z^{d+1}$ is
+\[
+ H_d=\sum_{\substack{i,j,h\geq0\\i+j+h=d}}
+            u_i v_j w_h.
+\]
+It has a coefficient $1$ and at most $(d+1)^2$ terms, so it lies in
+$\mathcal S$ and has rank at most $(d+1)^2$.
+For each $m\geq1$, extracting degree $m\ell$ from the powered leg maps
+gives the restriction
+\[
+ A^{\otimes m}\otimes H_{m\ell}\res S^{\otimes m},
+\]
+explicitly: if $L_X(t)$ is the powered first-leg map, send
+$x\otimes u_i$ to $[t^i]L_X(t)x$, and use the analogous maps on the
+other legs. The condition $i+j+h=m\ell$ extracts exactly that
+coefficient of $F(t)^{\otimes m}$, which is $S^{\otimes m}$.
+Thus
+\[
+ \lambda(S)^m\leq(m\ell+1)^2\lambda(A)^m.
+\]
+The extra factor tends to $1$ after taking $m$th roots. Here $\ell$
+is fixed by the original degeneration, independently of $m$.
+\end{proof}
+
+\section{The integral convolution bound}
+
+For positive $r,s$ define
+\[
+ C(r,s)=\sum_{i=0}^{r-1}\sum_{j=0}^{s-1}x_i y_j z_{i+j},
+ \qquad N=r+s-1.
+\]
+Its coefficient of $x_0y_0z_0$ is $1$, so $C(r,s)\in\mathcal S$.
+The later separator needs only $\lambda(C(r,s))\leq N$. A single
+scaled interpolation identity cannot give this over the integers:
+its multiplier must also be eliminated. We construct finitely many
+identities whose multipliers can be patched by B\'ezout.
+
+\begin{lemma}\label{lem:conv}
+For every fixed $r,s\geq1$, with $N=r+s-1$, there is a constant
+$K_{r,s}>0$ such that
+\[
+ \rk(C(r,s)^{\otimes m})\leq K_{r,s}N^m\quad(m\geq1).
+\]
+Consequently every character satisfies $\lambda(C(r,s))\leq N$.
+\end{lemma}
+\begin{proof}
+Let $B=\Z[t]/(g)$, where $g$ is monic of degree $d\geq1$; $B=\Z$
+with $d=1$ is also allowed. Its standard basis starts with $1$.
+For any nodes $a_0,\ldots,a_{N-1}\in B$, form the Vandermonde matrix
+$V_{\ell k}=a_\ell^k$ ($0\leq\ell,k<N$), and put
+$\delta=\det V$. The identity $\operatorname{adj}(V)V=\delta I$ gives
+\[
+ \delta C(r,s)=\sum_{\ell=0}^{N-1}
+ \left(\sum_{i=0}^{r-1}a_\ell^i x_i\right)
+ \left(\sum_{j=0}^{s-1}a_\ell^j y_j\right)
+ \left(\sum_{k=0}^{N-1}\operatorname{adj}(V)_{k\ell}z_k\right).
+\]
+Define $E=\Norm_B(\delta)\in\Z$ as the determinant of multiplication
+by $\delta$ on the free integer module $B$. Its adjugate supplies
+$\gamma\in B$ with $\gamma\delta=E\cdot1_B$: if $M_\delta$ is that
+multiplication matrix, take the coordinates of $\gamma$ to be
+$\operatorname{adj}(M_\delta)$ times the coordinates of $1_B$.
+The identity $M_\delta\operatorname{adj}(M_\delta)=EI$ proves the claim.
+Multiplying the output
+forms above by $\gamma$ therefore gives a length-$N$ decomposition of
+$EC(r,s)$ over $B$. Both adjugate identities hold without inversion.
+
+Take the $m$th tensor power \emph{in this same algebra}. It decomposes
+$E^mC(r,s)^{\otimes m}$ with $N^m$ terms. To descend it once to integers,
+let $\pi:B\to\Z$ extract the coefficient of $1$. For $u,v,w\in B$,
+write $u=\sum_{a<d}u_at^a$ and $v=\sum_{b<d}v_bt^b$. Then
+
+\[
+ \pi(uvw)=\sum_{0\leq a,b<d}u_a v_b\,\pi(t^{a+b}w).
+\]
+Since $\pi(1)=1$, this produces an integer decomposition with at most
+$d^2N^m$ terms. Only $\Z$-linearity of $\pi$ is used. Descending after
+powering keeps the overhead $d^2$ independent of $m$.
+
+First choose $B_0=\Z$ and the nodes $0,1,\ldots,N-1$.
+The resulting Vandermonde determinant is a nonzero integer $E_0$.
+For each prime $p\mid E_0$, choose $d_p\geq1$ with $p^{d_p}\geq N$
+and a monic integer lift $g_p$ of an irreducible polynomial of
+degree $d_p$ over $\mathbb F_p$.
+The algebra $B_p=\Z[t]/(g_p)$ reduces to $\mathbb F_{p^{d_p}}$.
+Choose $N$ nodes with distinct residues. The Vandermonde determinant
+is nonzero in that residue field; its norm, reduced modulo $p$, is
+therefore nonzero. Thus the integer multiplier $E_p$ satisfies
+$p\nmid E_p$.
+
+Let $I=\{0\}\sqcup\{p:p\text{ is prime and }p\mid E_0\}$ and $d_0=1$.
+The multipliers $(E_i)_{i\in I}$ have gcd $1$, as do their $m$th powers.
+For each $m\geq1$, choose integers $b_{i,m}$ such that
+\[
+ \sum_{i\in I}b_{i,m}E_i^m=1.
+\]
+Multiply the descended rank decompositions by $b_{i,m}$ in their
+third legs and add them. This gives an exact integer decomposition
+of $C(r,s)^{\otimes m}$ whose number of terms is at most
+\[
+ \left(\sum_{i\in I}d_i^2\right)N^m.
+\]
+All algebras, nodes, and dimensions were fixed before $m$; hence
+$K_{r,s}=\sum_{i\in I}d_i^2$ is a fixed positive constant. Applying a
+character and taking $m$th roots gives the required bound $\lambda(C(r,s))\leq N$.
+\end{proof}
+
+\begin{remark}
+The output flattening over $\Q$ has rank $N$, and its tensor powers
+have rank $N^m$, so the bound also gives $\ark(C(r,s))=N$.
+The auxiliary algebras appear only in the proof of an integer identity.
+For example, $C(2,2)$ uses the ordinary nodes $0,1,2$ with multiplier
+$E_0=2$, and the nodes $0,1,t$ in $\Z[t]/(t^2+t+1)$ with multiplier
+$E_2=3$. Thus the powers of $2$ and $3$ can be combined by B\'ezout.
+The second multiplier removes the prime obstruction left by the first.
+\end{remark}
+
+\section{An integral shared-leg separator}
+
+Character additivity applies to full direct sums. Shared-$X$ sectors
+must therefore acquire independent $X$ labels. The convolution below
+tracks the difference of two sector labels, and a quadratic weight
+retains precisely the terms where they agree.
+
+\begin{proposition}\label{prop:sep}
+Let $M\geq1$, and let $X,Y_h,Z_h$ be finite free coordinate modules.
+Suppose $A=\sum_{h=1}^M A_h$, with
+$A_h\in X\otimes Y_h\otimes Z_h$, where the $Y_h$ are disjoint,
+the $Z_h$ are disjoint, and $A_h\in\mathcal S$.
+There is an integer restriction followed by an integral degeneration
+\[
+ A\otimes C(2M-1,2M-1)\degto
+ \bigoplus_{h=1}^M\bigl(A_h\otimes B_X(M)\bigr).
+\]
+The $X$-spaces on the right are independent copies.
+\end{proposition}
+\begin{proof}
+Choose coordinate bases indexed by $a$ in $X$, and by $b,c$ in
+$Y_h,Z_h$. Let $c_{habc}$ be the coefficient of $x_a y_{hb}z_{hc}$ in $A$.
+The convolution coordinates $\xi_i,\eta_j,\zeta_k$ have ranges
+$0\leq i,j\leq2M-2$ and $0\leq k\leq4M-4$.
+Introduce target variables $X_{ag},Y_{hbu},Z_{hcv}$,
+where $g,u,v\in\{1,\ldots,M\}$.
+Use the following three substitutions, with every unmatched
+coordinate sent to zero:
+\begin{align*}
+ x_a\xi_i&\longmapsto\sum_{g:\ i=2g-2}X_{ag},\\
+ y_{hb}\eta_j&\longmapsto\sum_{u:\ j=u-h+M-1}Y_{hbu},\\
+ z_{hc}\zeta_k&\longmapsto\sum_{v:\ k=v+h+M-3}Z_{hcv}.
+\end{align*}
+All indicated indices lie in the convolution ranges.
+The support equation $i+j=k$ becomes
+\[
+ u-v+2(g-h)=0.
+\]
+Give the target variables the integer weights
+\[
+ w(X_{ag})=g^2,\qquad
+ w(Y_{hbu})=hu-h^2,\qquad
+ w(Z_{hcv})=-hv.
+\]
+On the supported terms their sum is $(g-h)^2$.
+The lowest-weight terms consequently have $g=h$ and $u=v$,
+and are exactly
+\[
+ \sum_{h,a,b,c,u}c_{habc}X_{ah}Y_{hbu}Z_{hcu}.
+\]
+This is the stated full direct sum. Every substitution has integer
+coefficients; no roots of unity or normalization denominators occur.
+To obtain the nonnegative polynomial exponents used in Lean, replace
+the three weights by $w_X,w_Y+M^2,w_Z+M^2$. Their supported sum is
+$2M^2+(g-h)^2$, so the same target is the coefficient of degree $2M^2$.
+\end{proof}
+
+\begin{corollary}[Integral shared-leg entropy]\label{cor:entropy}
+Let $s\geq1$ and $T=\sum_{i=1}^sT_i$ have the matched-sector structure
+of Proposition~\ref{prop:sep}, with $T_i\in\mathcal S\setminus\{0\}$.
+For every character and every probability vector
+$q=(q_1,\ldots,q_s)$, $q_i\geq0$, $\sum_iq_i=1$,
+\[
+ \lambda(T)\geq
+ \exp(p_X H(q))\prod_i\lambda(T_i)^{q_i},
+ \qquad H(q)=-\sum_i q_i\log q_i,
+\]
+where $0\log0=0$. For $A\in\mathcal S$ with $A\degto T$, the same
+lower bound holds with $\lambda(A)$ on the left.
+\end{corollary}
+\begin{proof}
+Deleting every sector except one restricts $T$ to a nonzero $T_i$,
+so $T$ itself admits the unit. In a tensor power, the second and third
+legs retain their sector-word labels, whereas the first leg is shared.
+For rational $q$, let $m\to\infty$ through multiples of a common
+denominator. Retain in $T^{\otimes m}$ only matched words with
+$mq_i$ occurrences of sector $i$, by deleting all other second- and
+third-leg coordinates. Different retained words have zero mixed
+coefficients, so they are matched sectors. There are
+$M=m!/\prod_i(mq_i)!$ sectors, each having character value
+$\prod_i\lambda(T_i)^{mq_i}$.
+Lemmas~\ref{lem:deg}, \ref{lem:conv} and Proposition~\ref{prop:sep}
+give
+\[
+ (4M-3)\lambda(T)^m
+ \geq M^{1+p_X}\prod_i\lambda(T_i)^{mq_i}.
+\]
+Taking $m$th roots leaves only
+\[
+ \lambda(T)\geq M^{p_X/m}\prod_i\lambda(T_i)^{q_i}
+                    \left(\frac{4M-3}{M}\right)^{-1/m}.
+\]
+Since
+$1\leq(4M-3)/M\leq4$ and
+$\log M=mH(q)+O_s(\log(m+1))$, the result follows.
+The last estimate is Stirling's formula applied to the factorials,
+with $0!=1$ for zero counts.
+Continuity extends it to all probability vectors.
+For each fixed $m$ the degeneration has already been handled by
+Lemma~\ref{lem:deg}; no uniform degree estimate in the type-counting
+limit is needed.
+\end{proof}
+
+\section{Integer sector constructions}
+
+The entropy inequality now applies to two integer constructions: a
+filtration supplies concavity, and a three-sector degeneration couples
+the two profiles. The orientations used below are $C_{XY}=C$ and
+$C_{XZ}(r,s)=\sum_{i<r,j<s}x_i z_j y_{i+j}$, with nonnegative indices.
+
+\paragraph{Determinant filtration.}
+Fix positive integers $r,s$. Let $\mathcal V_e=\Z[u,v]_e$ be the free
+module of homogeneous binary forms of degree $e\geq0$, and let
+$\sigma,\tau$ be a basis of an auxiliary rank-two module. In
+$\mathcal V_e\otimes\langle\sigma,\tau\rangle$, use
+\[
+ A_i=u^{e-i}v^i\sigma,\quad B_i=u^{e-i}v^i\tau
+       \quad(0\leq i\leq e),\qquad
+ K_j=B_j-A_{j+1}\quad(0\leq j<e).
+\]
+The basis $(A_0,\ldots,A_e,B_e,K_0,\ldots,K_{e-1})$ is unimodular:
+its inverse is $B_j=K_j+A_{j+1}$. Evaluation
+$\sigma\mapsto u$, $\tau\mapsto v$ sends the first $e+2$ vectors to
+the monomial basis of $\mathcal V_{e+1}$. For $e\geq1$, the kernel is
+$(u\tau-v\sigma)\mathcal V_{e-1}$; for $e=0$, it is zero.
+
+In monomial bases, multiplication of forms with $r$ and $s$ coefficients
+is exactly $C(r,s)$: the output coefficient of index $k$ is
+$\sum_{i+j=k}x_i y_j$. The auxiliary rank-two identity contributes
+the factor $B_X(2)$, leaving the coefficient leg unchanged.
+For $F\in\mathcal V_{r-1}$, multiplication by $F$ respects evaluation
+and its kernel. At input degree $s-1$ and output degree $r+s-2$,
+its quotient and kernel blocks are multiplication
+\[
+ \mathcal V_s\longrightarrow\mathcal V_{r+s-1},\qquad
+ \mathcal V_{s-2}\longrightarrow\mathcal V_{r+s-3}\quad(s\geq2).
+\]
+These are $C_{XY}(r,s+1)$ and $C_{XY}(r,s-1)$, sharing the
+coefficient leg of $F$. Weight $-1$ on the input kernel and $+1$ on
+the output dual kernel keeps both diagonal blocks at weight zero.
+The block from input kernel to output quotient is zero, because
+multiplication preserves the kernel. The opposite off-diagonal block
+has weight one and disappears from the leading coefficient. Thus
+$C_{XY}(r,s)\otimes B_X(2)$ degenerates onto these two matched
+sectors, with a common first leg and disjoint second and third legs.
+At $s=1$, the input kernel is empty, leaving only
+$C_{XY}(r,2)$. Permuting legs gives the other orientations.
+
+\paragraph{Three sectors.}
+In $C(r,3s+r-1)$, the matched sectors have coordinates
+($0\leq a<r$, $0\leq b<s$)
+\[
+ \begin{array}{c|ccc}
+ &x&y&z\\\hline
+ \text{left}&a&b&a+b\\
+ \text{middle}&r-1-a&s+a+b&s+r-1+b\\
+ \text{right}&a&2s+r-1+b&2s+r-1+a+b.
+ \end{array}
+\]
+Give the middle $Y$-interval $[s,2s+r-2]$ weight $1$ and the
+middle $Z$-interval $[s+r-1,2s+r-2]$ weight $-1$; all other weights
+are zero. The convolution support prevents negative-weight terms.
+The zero-weight tensor consists of the two outer $C_{XY}(r,s)$
+sectors and the middle $C_{XZ}(r,s)$ sector, with the first
+coordinate reversed in the middle sector.
+That reversal identifies the value of the individual middle branch;
+the actual three branches continue to share the original first leg.
+
+\paragraph{Character profiles.}
+The profiles are numerical functions of the two convolution dimensions.
+A character may distinguish the first two legs. Pairing it with the
+exchanged character makes one profile symmetric while retaining a second
+profile for the different output orientation.
+For a character $\lambda$ and its parameters from~\eqref{eq:dot},
+define $G:\mathcal S\to\R_{\geq0}$ and $a_0,b_0$ by
+\[
+ G(T)=\sqrt{\lambda(T)\lambda(T^{X\leftrightarrow Y})},\qquad
+ a_0=(p_X+p_Y)/2,\quad b_0=p_Z,
+\]
+Here $T^{X\leftrightarrow Y}$ exchanges the first two legs. For $r,s\geq1$,
+define the symmetric and oriented convolution profiles
+\[
+ V(r,s)=G(C_{XY}(r,s)),\qquad U(r,s)=G(C_{XZ}(r,s)).
+\]
+The dot law, determinant endpoint, and output-dot restriction of
+$C(2,2)$ give the bounds used at zero parameters:
+\[
+ V(r,1)=r^{a_0},\quad V(r,2)\leq2^{a_0}V(r,1),\quad
+ 2^{b_0}\leq V(2,2).
+\]
+
+For later leg permutations, write $\lambda^\pi(T)=\lambda(T^\pi)$,
+where $XY,YZ$ exchange the named legs and
+$T^{\mathrm{cyc}}(y,z,x)=T(x,y,z)$. The following identities follow by
+relabeling the convolution indices. ``Paired'' means the geometric mean
+of the two character values:
+\[
+\begin{array}{c|c|c|c|c}
+\text{characters}&\text{arguments}&\text{paired }C_{XY}&
+\text{paired }C_{XZ}&\text{shared exponent}\\\hline
+(\lambda,\lambda^{XY})&(r,s)&V(r,s)&U(r,s)&a_0\\
+(\lambda^{YZ},(\lambda^{XY})^{YZ})&(r,s)&U(r,s)&V(r,s)&a_0\\
+(\lambda^{\mathrm{cyc}},(\lambda^{XY})^{\mathrm{cyc}})&
+(s,r)&U(r,s)&U(r,s)&b_0
+\end{array}
+\]
+For a matched-sector tensor $T=\sum_hT_h$, convert the sector
+constructions into concavity by applying
+Corollary~\ref{cor:entropy} to $\lambda$ and to the character obtained
+by exchanging $X,Y$, using the same probability vector. Averaging
+the logarithms gives, with averaged shared-leg exponent $\alpha>0$,
+\[
+ \log G(T)\geq\alpha H(q)+\sum_h q_h\log G(T_h).
+\]
+For positive sector values, put
+$Z=\sum_hG(T_h)^{1/\alpha}$ and $q_h=G(T_h)^{1/\alpha}/Z$.
+Then the right side is $\alpha\log Z$, yielding
+\[
+ G(T)^{1/\alpha}\geq\sum_h G(T_h)^{1/\alpha}
+\]
+when the averaged exponent of the shared leg is $\alpha>0$.
+Apply this argument to each character pair in the table, using
+degeneration monotonicity for the source. In the
+determinant construction the source has the extra factor $B_X(2)$,
+so its paired value is multiplied by $2^\alpha$. For a character pair
+$(\phi,\psi)$, its paired convolution profile is
+$J(r,s)=\sqrt{\phi(C_{XY}(r,s))\psi(C_{XY}(r,s))}$, with $\alpha$
+the average of their $X$-dot exponents. Consequently,
+\[
+ J(r,s+1)^{1/\alpha}+J(r,s-1)^{1/\alpha}
+ \leq2J(r,s)^{1/\alpha}\quad(s\geq2).
+\]
+In the third row, $J(r,s)=U(s,r)$, so this is first-coordinate
+concavity for $U^{1/b_0}$. In the
+three-sector construction there is no extra factor: the table gives
+the two coupled tripling inequalities with exponent $a_0$, and the
+self-tripling inequality with exponent $b_0$. Symmetry supplies the
+other coordinate of $V$.
+
+\section{The discrete parameter cap}
+
+\begin{lemma}\label{lem:cap}
+For every character, its dot parameters satisfy
+\begin{equation}\label{eq:cap}
+ b_0\leq4a_0(1-a_0),\qquad a_0=(p_X+p_Y)/2,\quad b_0=p_Z.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Fix a character and its profiles just defined. If $a_0=0$, the
+endpoint with $r=2$ gives $V(2,2)\leq1$, so $2^{b_0}\leq V(2,2)$
+forces $b_0=0$. The case $b_0=0$ is immediate since $0\leq a_0\leq1$.
+Hence assume $a_0,b_0>0$, and put
+\[
+ p=1/a_0\geq1,\qquad \theta=b_0/a_0>0,\qquad
+ P=V^{1/a_0},\quad Q=U^{1/a_0}.
+\]
+The remaining goal is $\theta\leq4(p-1)/p$.
+The determinant construction and its leg permutations make $P$
+separately discretely concave, $Q$ concave in its second coordinate,
+and $Q^{1/\theta}$ concave in its first. Here discrete concavity
+means that consecutive increments are nonincreasing. Integer coordinate
+restrictions and Lemma~\ref{lem:conv} give positivity, coordinate
+monotonicity, symmetry of $P$, and
+\[
+ P(1,s)=s,\quad Q(n,1)=n^\theta,\qquad
+ P(n,s),Q(n,s)\leq(n+s-1)^p\quad(n,s\geq1).
+\]
+The three-sector construction gives
+\begin{align*}
+ P(n,3s+n-1)&\geq2P(n,s)+Q(n,s),\\
+ Q(n,3s+n-1)&\geq2Q(n,s)+P(n,s),\\
+ Q(3n+s-1,s)^{1/\theta}&\geq3Q(n,s)^{1/\theta}.
+\end{align*}
+For $n\geq2$, the secant inequality for the concave row $P(n,\cdot)$ gives
+\[
+ P(n,4n-1)\leq P(n,n)+\frac{3n-1}{n-1}
+                                (P(n,n)-P(n,1)).
+\]
+The first tripling inequality and positivity therefore give
+$Q(n,n)\leq\frac{2n}{n-1}P(n,n)\leq4P(n,n)$.
+A positive nondecreasing concave row satisfies $f(n)\leq nf(2)$: for $n\geq2$,
+use $f(n)\leq f(1)+(n-1)(f(2)-f(1))$, and for $n=1$ use
+monotonicity. Apply this in each coordinate of $P$ to obtain
+\[
+ n^\theta=Q(n,1)\leq Q(n,n)\leq4P(n,n)
+                      \leq4P(2,2)n^2.
+\]
+Thus $\theta\leq2$. If $p\geq2$, this already gives
+$\theta\leq4(p-1)/p$. It remains to handle $1\leq p<2$.
+
+\paragraph{Common slopes.}
+Row concavity gives limiting increments and the same linear growth
+rates: the nonnegative increments decrease, and telescoping followed
+by Ces\`aro averaging identifies their limit with $f(s)/s$.
+For a fixed positive integer $n$, let $L_P,L_Q$ be these two row limits.
+Dividing the first two tripling inequalities by $s$ gives
+$3L_P\geq2L_P+L_Q$ and $3L_Q\geq2L_Q+L_P$, respectively,
+so the two row growth rates agree. Write
+\[
+ L_n=\lim_{s\to\infty}\frac{P(n,s)}s
+    =\lim_{s\to\infty}\frac{Q(n,s)}s.
+\]
+Every row increment is at least $L_n$, and monotonicity in $n$ makes
+$L_n$ nondecreasing. Put $H(h)=P(n,h)+Q(n,h)$ for this paragraph.
+Then $H(3h+n-1)\geq3H(h)$. Its iterates are
+$h_j=3^j(h+(n-1)/2)-(n-1)/2$, so
+$H(h)\leq H(h_j)/3^j$. Since $H(h_j)/h_j\to2L_n$, this yields
+\[
+ P(n,h)+Q(n,h)\leq(2h+n-1)L_n\quad(n,h\geq1).
+\]
+Positivity at $h=1$ implies $L_n>0$. With $D_n=P(n,n)$ and
+$h=\max(n,m)$, use
+$P(n,h)\geq D_n+(h-n)L_n$ and
+$Q(n,h)\geq Q(n,m)+(h-m)L_n$ in the preceding bound to obtain
+\[
+ Q(n,m)\leq L_n(m+2n-1)-D_n.
+\]
+At $m=n$, $Q(n,n)\geq(n-1)L_n$ gives $D_n\leq2nL_n$.
+Also $D_n\geq n+(n-1)L_n$, since $P(n,1)=n$. For $n\geq2$,
+these imply
+\[
+ \tfrac12\leq\frac{nL_n}{D_n}\leq2\quad(n\geq2).
+\]
+
+\paragraph{Eliminate the varying slope.}
+Fix positive integers $u,v$, let $\tau=u/v$, and, for integers $t\geq2$,
+set
+\[
+ D(t)=P(vt,vt),\quad W(t)=Q(vt,ut),\quad
+ \ell_t=\frac{vtL_{vt}}{D(t)},\qquad z=\frac{u-1}{2v+u}\geq0.
+\]
+For positive integers $n,m$, the two-coordinate gains follow in a
+definite order. First, symmetry
+and the nondecreasing slopes give
+$P(n+v,n+v)\geq D_n+vL_n+vL_{n+v}\geq D_n+2vL_n$.
+For $Q$, move in the second coordinate first. The affine bound gives
+\[
+ Q(n,m+u)\geq Q(n,m)+uL_n
+ \geq Q(n,m)\left(1+
+          \frac{uL_n}{L_n(m+2n)-D_n}\right).
+\]
+The denominator is positive because it strictly exceeds $Q(n,m)$.
+At fixed second coordinate $s$, put $f(j)=Q(j,s)^{1/\theta}$.
+Concavity and self-tripling give, for $1\leq h\leq2n+s-1$,
+\[
+ f(n+h)-f(n)\geq\frac{h}{2n+s-1}(f(3n+s-1)-f(n))
+             \geq\frac{2h}{2n+s-1}f(n).
+\]
+Use $h=v$, $n=vt$, $m=ut$, and then $s=m+u$. The resulting steps are
+\begin{align*}
+ D(t+1)&\geq D(t)(1+2\ell_t/t),\\
+ W(t+1)&\geq W(t)(1+F_\tau(\ell_t)/t)
+                       (1+\gamma/(t+z))^\theta,\\
+ F_\tau(x)&=\frac{\tau x}{(\tau+2)x-1},\qquad
+ \gamma=\frac2{2+\tau}.
+\end{align*}
+The function $F_\tau$ is used on $x\geq1/2$, where its denominator is positive.
+The varying $\ell_t\in[1/2,2]$ is the obstacle to summing the
+second step directly. To eliminate it, put $y=p/2$. The identity
+\[
+ F_\tau(x)-F_\tau(y)+
+ \frac{\tau(x-y)}{((\tau+2)y-1)^2}
+ =\frac{\tau(\tau+2)(x-y)^2}
+ {((\tau+2)x-1)((\tau+2)y-1)^2}\geq0
+\]
+for $x,y\geq1/2$ proves the tangent bound
+\[
+ F_\tau(x)\geq F_\tau(p/2)-c(x-p/2),\qquad
+ c=\frac{\tau}{((\tau+2)p/2-1)^2}\geq0\quad(x\geq1/2).
+\]
+The tangent contributes $-c\ell_t/t$, which is cancelled by
+$(c/2)$ times the diagonal logarithmic increment. Accordingly, the
+potential $\Phi(t)=\log W(t)+(c/2)\log D(t)$ satisfies
+\begin{align*}
+ \Phi(t+1)-\Phi(t)&\geq
+ \frac{\theta\gamma+F_\tau(p/2)+cp/2}{t}-O(t^{-2}),\\
+ \Phi(t)&\leq p(1+c/2)\log t+O(1).
+\end{align*}
+The first estimate uses $\log(1+x)\geq x-x^2/2$; the bounded slopes
+make the error uniform in $t$ for this fixed ray. The second uses the
+rank bounds. Summing telescopically, the $t^{-2}$ errors remain bounded
+and the $cp/2$ terms cancel, leaving
+\[
+ \frac{2\theta}{2+\tau}+\frac{\tau}{\tau+2-2/p}\leq p.
+\]
+This holds for every positive rational $\tau$, hence for every
+$\tau>0$ by continuity. Taking $\tau=4/p-2>0$ gives
+$\theta\leq4(p-1)/p$. Since $b_0=a_0\theta$ and $p=1/a_0$,
+this is~\eqref{eq:cap}.
+\end{proof}
+
+\section{The finite scheme and its arithmetic cost}
+
+\begin{proof}[Proof of Theorem~\ref{thm:ring}]
+Fix $k\geq0$ and $\varepsilon>0$, and put $\eta=\varepsilon/2$.
+Choose an integer $q\geq2$ with $2<q^\eta$, and let
+$j=\lceil q^k\rceil$. For every character, $j\leq2q^k$ and
+$0\leq b_0\leq1$, so~\eqref{eq:mm} and Lemma~\ref{lem:cap} give
+\[
+ \lambda(\langle q,j,q\rangle)
+ \leq2q^{2a_0+kb_0}
+ \leq2q^{\max_{0\leq x\leq1}(2x+4kx(1-x))}=2q^{f(k)}.
+\]
+The quadratic maximum occurs at $x=1$ for $k\leq1/2$, and at
+$x=1/2+1/(4k)$ otherwise. Hence~\eqref{eq:spectrum} gives
+\[
+ \ark(\langle q,j,q\rangle)\leq2q^{f(k)}<q^{f(k)+\eta}.
+\]
+There is therefore a fixed integer $m\geq1$ with an exact integer
+rank decomposition of length $\rho<q^{m(f(k)+\eta)}$. Reindexing
+this tensor power gives $\langle a,b,a\rangle$, where
+$a=q^m$, $b=j^m$. Its three flattenings over $\Q$ supply the last
+condition in the finite base certificate
+\begin{equation}\label{eq:scheme}
+ a\geq2,\qquad b\geq a^k,\qquad
+ \log_a\rho<f(k)+\eta,\qquad \rho\geq\max\{ab,a^2\}.
+\end{equation}
+Only this fixed scheme is needed from now on.
+
+\paragraph{Correctness over every ring.}
+Let $R$ be any associative ring, and let
+$A\in R^{a\times b}$ and $B\in R^{b\times a}$.
+Writing the chosen integer decomposition coefficients as
+$\alpha,\beta,\gamma$ gives, for $1\leq i,h\leq a$,
+\[
+ (AB)_{ih}=\sum_{\ell=1}^{\rho}\gamma_{ih,\ell}
+ \left(\sum_{i',j'}\alpha_{\ell,i'j'}A_{i'j'}\right)
+ \left(\sum_{j'',h'}\beta_{\ell,j''h'}B_{j''h'}\right),
+\]
+where the entry sums run over the indicated matrix coordinates.
+Expansion leaves each $A$-entry to the left of its $B$-entry, and
+integer coefficient equality proves the identity. Integer multiples
+use only addition and negation. The same expansion applies to
+rectangular block multiplication, a $\Z$-bilinear map, so it also
+justifies the recursive scheme.
+
+\paragraph{Arithmetic cost and padding.}
+An integer coefficient $c$ uses at most $|c|+1$ gates, and adding
+its term to an accumulator uses one further gate. Let $K_0$ be the
+sum of $|c|+2$ over all entries of the three fixed coefficient arrays,
+and set $d=\max\{ab,a^2\}\leq\rho$. The preparation and reconstruction
+at depth $t+1$ act on blocks with $(ab)^t,(ab)^t,(a^2)^t$ entries.
+Each of the $\rho$ recursive products is computed once and reused in
+reconstruction. Thus the actual gate count $T(t)$ satisfies
+\[
+ T(0)=1,\qquad T(t+1)\leq\rho T(t)+K_0d^t.
+\]
+Induction using $d\leq\rho$ gives
+\[
+ \operatorname{cost}(t)=T(t)\leq(1+K_0)(t+1)\rho^t.
+\]
+For an integer $n\geq1$, choose $t=\lfloor\log_a n\rfloor+1$.
+Then
+\[
+ n<a^t\leq an,\qquad \lceil n^k\rceil\leq b^t.
+\]
+Zero input padding and output wires give the requested shape.
+The inner padding need not have a constant ratio to $n^k$; its
+operations are already included in $\operatorname{cost}(t)$.
+Since $\log_a\rho\geq0$ and $t+1=O(1+\log n)$,
+\[
+ \operatorname{cost}(t)=O\bigl((1+\log n)n^{\log_a\rho}\bigr)
+                     =O_{k,\varepsilon}(n^{f(k)+\varepsilon}).
+\]
+Here $1+\log n=O_\eta(n^\eta)$ and~\eqref{eq:scheme} reserves the
+other $\eta$ of slack. A fixed constant covers every $n\geq1$.
+The base dimensions, coefficients, and operation counts depend only
+on $k,\varepsilon$, so this constant is independent of $R$.
+\end{proof}
+
+\section{Supplementary exponent bounds}
+
+For nonnegative shape exponents $u,v,w$, let
+$\omega_{\mathrm{univ}}(u,v,w)$ be the infimum of arithmetic exponents
+of universal integer bilinear circuits for shapes
+$\lceil n^u\rceil\times\lceil n^v\rceil$ and
+$\lceil n^v\rceil\times\lceil n^w\rceil$. Let $\omega_R(u,v,w)$ be
+its counterpart when algorithms may depend on the fixed ring $R$.
+The main theorem gives
+\[
+ \omega_R(1,k,1)\leq\omega_{\mathrm{univ}}(1,k,1)\leq f(k).
+\]
+For the universal lower bound, evaluate the integer coefficient
+identities over $\Q$. Output flattening gives at least $n^2$
+products, hence
+$\omega_{\mathrm{univ}}(1,k,1)=2$ for $0\leq k\leq1/2$.
+In particular the universal dual exponent is at least $1/2$.
+A fixed degenerate ring can have weaker arithmetic lower bounds;
+counting explicit dense output writes also gives exponent two for
+that output model.
+
+\begin{corollary}[Three arbitrary dimensions]\label{cor:three}
+Let $a\geq b\geq c\geq0$ be the decreasing rearrangement of three
+shape exponents. Uniformly over all associative rings,
+\[
+ \omega_R(a,b,c)\leq\omega_{\mathrm{univ}}(a,b,c)
+ \leq
+ \begin{cases}
+ a+b,&b\geq2c,\\[2pt]
+ a+b+\dfrac{(2c-b)^2}{4(a+c-b)},&b<2c.
+ \end{cases}
+\]
+The bound holds for every permutation of the shape exponents,
+and the universal exponent equals $a+b$ when $b\geq2c$.
+\end{corollary}
+\begin{proof}
+Permute~\eqref{eq:cap} to obtain the three symmetric parameter
+constraints. These permutations act on integer tensor identities;
+each resulting scheme still places the first input on the left and
+the second on the right.
+For any character, let $(p_1,p_2,p_3)$ be the permutation of its dot
+parameters corresponding to the sorted shape weights, and put
+$S=p_1+p_2+p_3$. If $S\leq2$, then $p_i\in[0,1]$ bounds the
+objective $ap_1+bp_2+cp_3$ by $a+b$.
+If $S>2$, the three cap constraints imply $S\leq9/4$ and, with
+$d=\sqrt{9-4S}\in[0,1]$,
+\[
+ \frac{3-2d-d^2}{4}\leq p_i\leq\frac{3+2d-d^2}{4}.
+\]
+Using these endpoints and $p_1+p_2+p_3=S$ bounds the objective by
+\[
+ \frac{3(a+b+c)}4+\frac{a-c}2d-\frac{a+c-b}4d^2.
+\]
+Its maximum on $[0,1]$ is the displayed bound; in the second branch,
+$b<2c$ ensures $a+c-b>0$.
+
+For rational shape exponents, choose a common integer base $A\geq2$
+so $A^a,A^b,A^c$ are integers. The character bound and spectral
+duality produce a finite power scheme with rank ratio below the
+claimed bound plus any positive slack. At common depth
+$t=\lfloor\log_{A^m}n\rfloor+1$, where $m\geq1$ is that fixed power,
+the same level estimate gives $O((t+1)\rho^t)$ operations.
+For real exponents, approximate the sorted triple from above by
+rational triples and use continuity of the bound and padding.
+When all exponents are zero, a single scalar product suffices.
+Finally, the three flattenings over $\Q$ give the universal lower
+bound $\max\{a+b,a+c,b+c\}=a+b$.
+\end{proof}
+
+\paragraph{Verification.}
+The accompanying \texttt{verify\_integral\_constructions.py} checks
+finite instances of the separator, determinant bases and blocks,
+and the oriented tripling identity using exact integer arithmetic.
+These checks supplement the general proofs. The \texttt{formalization}
+directory proves Theorem~\ref{thm:ring}, including coefficient arithmetic,
+with strict addition, negation, and ordered multiplication syntax.
+The witnesses are classical circuit existence proofs; no executable
+implementation or evaluator runtime bound is extracted. The
+three-dimension corollary and lower bounds are supplementary mathematical
+statements outside the public Lean theorem.
+
+\begin{thebibliography}{9}
+\bibitem{BCS} Peter B\"urgisser, Michael Clausen, and M. Amin Shokrollahi.
+\emph{Algebraic Complexity Theory}. Springer, 1997.
+Chapters 14--15, pp.~351--423.
+\url{https://doi.org/10.1007/978-3-662-03338-8}.
+\bibitem{LN} Rudolf Lidl and Harald Niederreiter.
+\emph{Finite Fields}. Cambridge University Press.
+Chapter 2, ``Structure of Finite Fields.''
+\url{https://doi.org/10.1017/CBO9780511525926}.
+\bibitem{U} Przemys\l aw Uzna\'nski.
+\emph{Rectangular matrix multiplication from shared-leg entropy}.
+arXiv:2610.10494v1, October 7, 2026.
+\url{https://arxiv.org/html/2610.10494v1}.
+\bibitem{O} OpenAI.
+\emph{An upper bound of $9/4$ for the matrix multiplication exponent}.
+October 2, 2026.
+\url{https://github.com/openai/math/tree/main/preprints/Matrix-Multiplication-Nine-Fourths-October-2-2026}.
+\bibitem{Zui} Jeroen Zuiddam.
+\emph{Algebraic complexity, asymptotic spectra and entanglement polytopes}.
+Updated dissertation, April 6, 2020. Sections 2.3, 2.7--2.9.
+\url{https://staff.fnwi.uva.nl/j.zuiddam/diss/diss_v2.pdf}.
+\end{thebibliography}
+\end{document}

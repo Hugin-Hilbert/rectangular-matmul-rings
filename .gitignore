@@ -1,0 +1,32 @@
+# Local build artifacts and source archives
+.lake/
+dist/
+.psa/
+__pycache__/
+*.py[cod]
+*.olean
+*.ilean
+
+# Working copies used to inspect upstream sources
+/upstream-openai/
+/upstream-allfields/
+/upstream-fixedpoint/
+
+# Local workspace state
+/.agents/
+/.aws/
+/.codex/
+
+# LaTeX auxiliary files; keep the research note PDF
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Editor and operating system files
+.DS_Store
+*~
+*.swp

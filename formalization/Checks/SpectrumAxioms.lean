@@ -1,0 +1,12 @@
+import OAI.LinearAlgebra.MatrixMultiplication.AuxiliarySeparation.Spectrum.StateObstruction
+import OAI.LinearAlgebra.MatrixMultiplication.AuxiliarySeparation.Spectrum.MultiplicativeStates
+import Matmul.IntegralSpectrumDuality
+
+#print axioms brouwer_fixed_point
+#print axioms OAI.MatrixMultiplication.AuxiliarySeparation.normalizedStates_nonempty_of_no_catalyst
+#print axioms OAI.MatrixMultiplication.AuxiliarySeparation.exists_monotone_semiringHom_of_normalizedStates
+
+#print axioms Matmul.IntegralSpectrum.exists_detecting_character
+#print axioms Matmul.IntegralSpectrum.asymptoticRank_le_of_character_bound
+#print axioms Matmul.IntegralSpectrum.exists_rank_power_lt
+#print axioms Matmul.IntegralSpectrum.asymptoticRank_eq_sSup_characterValues

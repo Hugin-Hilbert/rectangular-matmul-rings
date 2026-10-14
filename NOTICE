@@ -1,0 +1,41 @@
+Rectangular matrix multiplication over arbitrary rings
+
+This project includes source modules derived from the following developments:
+
+1. openai/math
+   https://github.com/openai/math
+   Commit fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb
+   Tensor foundations and scalar entropy and counting modules.
+   Licensed under the Apache License, Version 2.0.
+
+2. Jeroen Zuiddam, omega-nine-quarters-all-fields
+   Copyright 2026 Jeroen Zuiddam
+   https://github.com/jzuiddam/omega-nine-quarters-all-fields
+   Commit 615b591cddd8792173c17b58558ef3b9f11a702c
+   Generic convex separation and spectral state construction, derived from
+   openai/math commit adc7f1241b42e322a6451854ab7e4b4c146bf78a.
+   Licensed under the Apache License, Version 2.0.
+   The original notice is retained verbatim in
+   licenses/omega-nine-quarters-all-fields.NOTICE.
+
+3. harfe, fixed-point-theorems-lean4
+   Copyright (c) 2026 harfe
+   https://github.com/harfe/fixed-point-theorems-lean4
+   Commit 770940ddf9878cf61952ed53d910b92bca841838
+   Five source modules for the spectral fixed point argument.
+   These sources retain the MIT license in
+   formalization/FixedPointTheorems/MIT_LICENSE.
+
+The reused modules were adapted where necessary for Lean 4.33.0-rc1 and the
+recorded mathlib cache. Changes include compatible import names, set notation,
+nonnegative subtypes, finite index coercions, and explicit noncomputability.
+The mathematical statements and proofs are retained. Detailed source
+provenance and compatibility notes are in formalization/PROVENANCE.txt.
+
+The Matmul modules add the integral tensor semiring, integral convolution and
+coefficient extraction arguments, shared leg separation, discrete rectangular
+profile analysis, and universal arithmetic circuit compilation. Project
+additions and tooling are distributed under the Apache License, Version 2.0.
+
+The rectangular mathematical bound is attributed to Przemysław Uznański,
+Rectangular matrix multiplication from shared-leg entropy, arXiv:2610.10494.

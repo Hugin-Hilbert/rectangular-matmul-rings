@@ -1,0 +1,6 @@
+import Matmul.EntropyAnalytic.Tag
+
+#print axioms OAI.MatrixMultiplication.AuxiliarySeparation.log_tag_of_integral_bounds
+#print axioms OAI.MatrixMultiplication.AuxiliarySeparation.tag_of_integral_bounds
+#print axioms OAI.MatrixMultiplication.Foundation.tendsto_log_exactWords_card_mul
+#print axioms OAI.MatrixMultiplication.ConditionalLabels.exists_rational_law_sequence
